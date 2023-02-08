@@ -17,15 +17,19 @@ export class AppController {
   index() {
     return { message: 'Welcome to the homepage' };
   }
+
+  
   @Post('/register')
   @HttpCode(200)
   async register(@Body() registerDto: RegisterDto){
     if(!registerDto.email||
-      !registerDto.password || !registerDto.passwordAgain )
+      !registerDto.password || !registerDto.rePassword ){
+        throw new BadRequestException('All fields are required');
+      }
     if(!registerDto.email.includes('@')){
       throw new BadRequestException('Email must contain a @ character');
     }
-    if(registerDto.password !== registerDto.passwordAgain){
+    if(registerDto.password !== registerDto.rePassword){
       throw new BadRequestException('The two passwords must match');
     }
     if(registerDto.password.length < 8){
