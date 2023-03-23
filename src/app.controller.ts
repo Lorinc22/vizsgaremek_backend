@@ -6,6 +6,7 @@ import User from './user.entity';
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
 import { Response} from 'express';
+import Restaurant from './restaurant.entity';
 
 @Controller()
 export class AppController {
@@ -21,7 +22,17 @@ export class AppController {
     return { message: 'Welcome to the homepage' };
   }
 
+  @Get('restaurant/:id')
+  async getRestaurant(@Param('id') id: number ){
+    const restaurantRepo = this.dataSource.getRepository(Restaurant);
+    return await (await this.appService.findOneByRestaurant(id));
+  }
 
+  @Get('restaurants')
+  async getAllRestaurant(){
+    const restaurantRepo = this.dataSource.getRepository(Restaurant);
+    return await (await this.appService.findAllRestaurant());
+  }
   
   @Post('/register')
   @HttpCode(200)
@@ -72,4 +83,6 @@ export class AppController {
       token: jwt
     };
   }
+
+  
 }

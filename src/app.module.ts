@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, Res } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt/dist';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import Restaurant from './restaurant.entity';
 import User from './user.entity';
 
 
@@ -15,11 +16,11 @@ import User from './user.entity';
       password: '',
       database: 'gorillago',
       entities: [
-        User
+        User, Restaurant
       ],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Restaurant]),
     JwtModule.register({
       secret: 'secret',
       signOptions: {expiresIn: '1d'}
