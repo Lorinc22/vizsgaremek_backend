@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
 import { Response} from 'express';
 import Restaurant from './restaurant.entity';
+import UpdateUserDto from './updateuser.dto';
 
 @Controller()
 export class AppController {
@@ -22,23 +23,11 @@ export class AppController {
     return { message: 'Welcome to the homepage' };
   }
 
-  @Get('restaurant/:id')
-  async getRestaurant(@Param('id') id: number ){
-    const restaurantRepo = this.dataSource.getRepository(Restaurant);
-    return await (await this.appService.findOneByRestaurant(id));
-  }
-
-  @Get('restaurants')
-  async getAllRestaurant(){
-    const restaurantRepo = this.dataSource.getRepository(Restaurant);
-    return await (await this.appService.findAllRestaurant());
-  }
-  
   @Post('/register')
   @HttpCode(200)
   async register(@Body() registerDto: RegisterDto){
     if(!registerDto.email||
-      !registerDto.password || !registerDto.rePassword ){
+      !registerDto.password || !registerDto.rePassword){
         throw new BadRequestException('All fields are required');
       }
     if(!registerDto.email.includes('@')){
@@ -50,10 +39,15 @@ export class AppController {
     if(registerDto.password.length < 8){
       throw new BadRequestException('The password must be at least 8 characters long');
     }
-
+   const userTaken = await this.appService.findOneByEmail(registerDto.email);
+   if(userTaken){
+    throw new BadRequestException('The email is alredy taken');
+   }
    const userRepo = this.dataSource.getRepository(User);
    const user = new User();
    user.email = registerDto.email;
+   user.fullname = "";
+   user.address = "";
    user.password = await bcrypt.hash(registerDto.password, 15 );
    await userRepo.save(user);
 
@@ -69,11 +63,11 @@ export class AppController {
     const user = await this.appService.findOneByEmail(email);
 
     if(!user){
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException('Hibás bejelentkezés');
     }
 
     if(!await bcrypt.compare(password, user.password)){
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException('Hibás bejelentkezés');
     }
 
     const jwt = await this.jwtService.signAsync({id: user.id});
@@ -82,6 +76,23 @@ export class AppController {
     return {
       token: jwt
     };
+  }
+
+  @Patch('users/:id')
+  async updateAccountInfo(@Param('id') id: number,@Body() updateUserDto: UpdateUserDto){
+    
+    return await( await this.appService.updateAccountInfo(id,updateUserDto));
+  }
+
+  @Get('restaurant/:id')
+  async getRestaurant(@Param('id') id: number ){
+    const restaurantRepo = this.dataSource.getRepository(Restaurant);
+    return await (await this.appService.findOneByRestaurant(id));
+  }
+
+  @Get('restaurants')
+  async getAllRestaurant(){
+    return await (await this.appService.findAllRestaurant());
   }
 
   

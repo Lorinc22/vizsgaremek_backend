@@ -9,6 +9,12 @@ export default class User {
     email: string;
 
     @Column()
+    fullname: string;
+
+    @Column()
+    address: string;
+
+    @Column()
     password: string;
 
     @Column()
