@@ -1,13 +1,16 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, Param, Patch, Post, Render, Req, Res } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppService } from './app.service';
-import RegisterDto from './register.dto';
-import User from './user.entity';
+import RegisterDto from './dto/register.dto';
+import LoginDto from './dto/login.dto';
+import User from './entity/user/user.entity';
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
 import { Response} from 'express';
-import Restaurant from './restaurant.entity';
-import UpdateUserDto from './updateuser.dto';
+import Restaurant from './entity/restaurant.entity';
+import UpdateUserDto from './dto/updateuser.dto';
+import Address from './entity/user/address.entity';
+import AddressDto from './dto/address.dto';
 
 @Controller()
 export class AppController {
@@ -46,8 +49,8 @@ export class AppController {
    const userRepo = this.dataSource.getRepository(User);
    const user = new User();
    user.email = registerDto.email;
-   user.fullname = "";
-   user.address = "";
+   user.firstName = "";
+   user.lastName = "";
    user.password = await bcrypt.hash(registerDto.password, 15 );
    await userRepo.save(user);
 
@@ -56,17 +59,16 @@ export class AppController {
 
   @Post('/login')
   async login(
-    @Body('email') email: string,
-    @Body('password') password: string,
+    @Body() loginDto: LoginDto,
     @Res({passthrough: true}) response: Response
     ){
-    const user = await this.appService.findOneByEmail(email);
+    const user = await this.appService.findOneByEmail(loginDto.email);
 
     if(!user){
       throw new BadRequestException('Hibás bejelentkezés');
     }
 
-    if(!await bcrypt.compare(password, user.password)){
+    if(!await bcrypt.compare(loginDto.password, user.password)){
       throw new BadRequestException('Hibás bejelentkezés');
     }
 
@@ -90,10 +92,37 @@ export class AppController {
     return await (await this.appService.findOneByRestaurant(id));
   }
 
+  @Get('user/address/:id')
+  async getUserAddress(@Param('id') id: number ){
+    const userRepo = this.dataSource.getRepository(User);
+    const user = await userRepo
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.address', 'address')
+    .where('address.id = :id', { id: id })
+    .getOne();
+    return user.address;
+  }
+
+
+  @Post('user:id/address')
+  async addAddress(@Body() addressDto: AddressDto, @Param('id') id: number ) {
+    console.log(addressDto);
+    const userRepo = this.dataSource.getRepository(User).findOneBy({ id: id})
+    
+  }
+
+
   @Get('restaurants')
   async getAllRestaurant(){
     return await (await this.appService.findAllRestaurant());
   }
+
+  @Get('users/:id')
+  async findOneByUser(@Param('id') id: number ){
+    return await (await this.appService.findOneByUser(id));
+  }
+
+  
 
   
 }

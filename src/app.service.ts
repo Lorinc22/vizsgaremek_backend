@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import Restaurant from './restaurant.entity';
-import UpdateUserDto from './updateuser.dto';
-import User from './user.entity';
+import Restaurant from './entity/restaurant.entity';
+import UpdateUserDto from './dto/updateuser.dto';
+import User from './entity/user/user.entity';
 
 @Injectable()
 export class AppService {
@@ -39,6 +39,14 @@ export class AppService {
   async updateAccountInfo(id: number, updateUserDto: UpdateUserDto): Promise<User>{
     await this.userRepository.update(id,updateUserDto)
     return await this.userRepository.findOne({
+      "where": {
+        "id": id,
+      } 
+    });
+  }
+
+  async findOneByUser(id: number): Promise<User> {
+    return this.userRepository.findOne({
       "where": {
         "id": id,
       } 
