@@ -3,8 +3,12 @@ import { JwtModule } from '@nestjs/jwt/dist';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import Restaurant from './restaurant.entity';
-import User from './user.entity';
+import Restaurant from './entity/restaurant.entity';
+import User from './entity/user/user.entity';
+import Address from './entity/user/address.entity';
+import Menu from './entity/menu.entity';
+import Order from './entity/order/order.entity';
+import Cart from './entity/cart.entity';
 
 
 @Module({
@@ -16,7 +20,12 @@ import User from './user.entity';
       password: '',
       database: 'gorillago',
       entities: [
-        User, Restaurant
+        User,
+        Restaurant,
+        Address,
+        Menu,
+        Order,
+        Cart,
       ],
       synchronize: true,
     }),
