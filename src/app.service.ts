@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
 import User from './entity/user/user.entity';
+import { UpdateUserInput } from './dto/updateuserinput.interface';
 
 @Injectable()
 export class AppService {
@@ -14,6 +15,22 @@ export class AppService {
     return this.userRepository.findOne(condition);
   }
 
+  async findUserById(id: number): Promise<User> {
+    return this.userRepository.findOne({
+      "where": {
+        "id": id,
+      } 
+    });
+  }
+
+  async findUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findOne({
+      "where": {
+          "email": email,
+      }
+  });
+  }
+
   async findOneByRestaurant(id: number): Promise<Restaurant> {
     return this.restaurantRepository.findOne({
       "where": {
@@ -22,18 +39,18 @@ export class AppService {
     });
   }
 
+  async searchRestaurants(searchTerm: string): Promise<Restaurant[]> {
+    const restaurants = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .where('restaurant.name LIKE :searchTerm', { searchTerm: `%${searchTerm}%` })
+      .getMany();
+    return restaurants;
+  }
+
   async findAllRestaurant(): Promise<Restaurant> {
     const restaurants = await this.restaurantRepository.find();
     const restaurantArray = JSON.parse(JSON.stringify(restaurants))
     return restaurantArray;
-  }
-
-  async findOneByEmail(email: string): Promise<User> {
-    return this.userRepository.findOne({
-      "where": {
-          "email": email,
-      },
-  });
   }
 
   async updateAccountInfo(id: number, updateUserDto: UpdateUserDto): Promise<User>{
@@ -45,12 +62,13 @@ export class AppService {
     });
   }
 
-  async findOneByUser(id: number): Promise<User> {
-    return this.userRepository.findOne({
+  async updateUserPassword(id: number, password: string): Promise<User>{
+    const updates: UpdateUserInput = { password };
+  await this.userRepository.update(id, updates);
+    return await this.userRepository.findOne({
       "where": {
         "id": id,
       } 
     });
   }
-
 }

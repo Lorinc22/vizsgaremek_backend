@@ -16,6 +16,9 @@ export default class User {
     lastName: string;
 
     @Column()
+    phoneNumber: string;
+
+    @Column()
     password: string;
 
     @Column()
