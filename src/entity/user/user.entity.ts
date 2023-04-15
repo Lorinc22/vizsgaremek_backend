@@ -21,9 +21,6 @@ export default class User {
     @Column()
     password: string;
 
-    @Column()
-    rePassword: string;
-
     @OneToOne(() => Address)
     @JoinColumn({ name: 'addressId' })
     address: Address;

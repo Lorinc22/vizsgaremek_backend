@@ -11,6 +11,8 @@ import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
 import AddressDto from './dto/address.dto';
 import UpdateUserPasswordDto from './dto/updateuserpassword.dto';
+import AddItemDto from './dto/additem.dto';
+import Cart from './entity/cart.entity';
 
 @Controller()
 export class AppController {
@@ -47,7 +49,7 @@ export class AppController {
     return await (await this.appService.findOneByRestaurant(id));
   }
 
-  @Get('restaurants/search/:searchTerm')
+  @Get('restaurants/:searchTerm')
   async searchRestaurants(@Param('searchTerm') searchTerm: string) {
   const restaurants = await this.appService.searchRestaurants(searchTerm);
   return restaurants;
@@ -145,5 +147,4 @@ export class AppController {
     const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
     return await( await this.appService.updateUserPassword(id,password));
   }
-
 }

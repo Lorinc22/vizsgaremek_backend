@@ -16,15 +16,10 @@ export default class Order {
     price: number;
 
     @ManyToOne(() => User)
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'userId' })
     user: User;
 
     @ManyToOne(() => Restaurant)
-    @JoinColumn({ name: 'restaurant_id' })
+    @JoinColumn({ name: 'restaurantId' })
     restaurant: Restaurant;
-
-
-
-
-
 }

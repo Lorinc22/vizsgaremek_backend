@@ -5,11 +5,16 @@ import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
 import User from './entity/user/user.entity';
 import { UpdateUserInput } from './dto/updateuserinput.interface';
+import Cart from './entity/cart.entity';
+import Menu from './entity/menu.entity';
+import AddItemDto from './dto/additem.dto';
 
 @Injectable()
 export class AppService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
               @InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
+              @InjectRepository(Cart) private readonly cartRepository: Repository<Cart>,
+              @InjectRepository(Menu) private readonly menuRepository: Repository<Menu>,
               ){}
   async findOne(condition: any): Promise<User> {
     return this.userRepository.findOne(condition);

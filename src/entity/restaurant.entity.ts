@@ -1,4 +1,4 @@
-import { Column,JoinColumn, OneToOne, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column,JoinColumn, OneToOne, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import Menu from "./menu.entity";
 
 @Entity()
@@ -11,8 +11,4 @@ export default class Restaurant {
 
     @Column()
     url: string;
-
-    @OneToOne(() => Menu)
-    @JoinColumn({ name: 'MenuId' })
-    menu: Menu;
 }

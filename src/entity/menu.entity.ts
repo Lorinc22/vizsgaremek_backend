@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import Restaurant from "./restaurant.entity";
 
 
 @Entity()
@@ -11,5 +12,9 @@ export default class Menu {
 
     @Column()
     price: number;
+
+    @ManyToOne(() => Restaurant)
+    @JoinColumn({ name: 'restaurantId' })
+    restaurant: Restaurant;
 
 }

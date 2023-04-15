@@ -9,6 +9,7 @@ import Address from './entity/user/address.entity';
 import Menu from './entity/menu.entity';
 import Order from './entity/order/order.entity';
 import Cart from './entity/cart.entity';
+import OrderItem from './entity/orederitem.entity';
 
 
 @Module({
@@ -26,6 +27,7 @@ import Cart from './entity/cart.entity';
         Menu,
         Order,
         Cart,
+        OrderItem
       ],
       synchronize: true,
     }),
