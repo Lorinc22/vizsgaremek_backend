@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Restaurant from './entity/restaurant.entity';
@@ -8,12 +8,12 @@ import { UpdateUserInput } from './dto/updateuserinput.interface';
 import Cart from './entity/cart.entity';
 import Menu from './entity/menu.entity';
 import AddItemDto from './dto/additem.dto';
+import { getManager } from 'typeorm';
 
 @Injectable()
 export class AppService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
               @InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
-              @InjectRepository(Cart) private readonly cartRepository: Repository<Cart>,
               @InjectRepository(Menu) private readonly menuRepository: Repository<Menu>,
               ){}
   async findOne(condition: any): Promise<User> {
@@ -58,6 +58,15 @@ export class AppService {
     return restaurantArray;
   }
 
+  async getMenusByRestaurant(restaurantId: number): Promise<Menu[]> {
+    const menus = await this.menuRepository
+      .createQueryBuilder('menu')
+      .leftJoinAndSelect('menu.restaurant', 'restaurant')
+      .where('restaurant.id = :restaurantId', { restaurantId })
+      .getMany();
+    return menus;
+  }
+
   async updateAccountInfo(id: number, updateUserDto: UpdateUserDto): Promise<User>{
     await this.userRepository.update(id,updateUserDto)
     return await this.userRepository.findOne({
@@ -76,4 +85,5 @@ export class AppService {
       } 
     });
   }
+
 }

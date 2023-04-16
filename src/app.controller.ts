@@ -13,6 +13,7 @@ import AddressDto from './dto/address.dto';
 import UpdateUserPasswordDto from './dto/updateuserpassword.dto';
 import AddItemDto from './dto/additem.dto';
 import Cart from './entity/cart.entity';
+import Menu from './entity/menu.entity';
 
 @Controller()
 export class AppController {
@@ -48,6 +49,12 @@ export class AppController {
     const restaurantRepo = this.dataSource.getRepository(Restaurant);
     return await (await this.appService.findOneByRestaurant(id));
   }
+
+  @Get('restaurants/:id/menus')
+async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
+  const menus = await this.appService.getMenusByRestaurant(restaurantId);
+  return menus;
+}
 
   @Get('restaurants/:searchTerm')
   async searchRestaurants(@Param('searchTerm') searchTerm: string) {

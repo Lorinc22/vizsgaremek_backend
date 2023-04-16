@@ -31,7 +31,7 @@ import OrderItem from './entity/orederitem.entity';
       ],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Restaurant]),
+    TypeOrmModule.forFeature([User, Restaurant, Menu]),
     JwtModule.register({
       secret: 'secret',
       signOptions: {expiresIn: '1d'}

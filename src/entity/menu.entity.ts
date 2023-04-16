@@ -13,6 +13,12 @@ export default class Menu {
     @Column()
     price: number;
 
+    @Column()
+    description: string;
+
+    @Column()
+    url: string;
+
     @ManyToOne(() => Restaurant)
     @JoinColumn({ name: 'restaurantId' })
     restaurant: Restaurant;
