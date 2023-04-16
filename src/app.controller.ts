@@ -151,7 +151,18 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
     if(updateUserPasswordDto.newPassword.length < 8){
       throw new BadRequestException('A jelszónak 8 karakter hosszúnak kell minimum lennie.');
     }
-    const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
-    return await( await this.appService.updateUserPassword(id,password));
+    // return await( await this.appService.updateUserPassword(id,password));
+    try{
+      const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
+      return true
+    }
+    catch(e){
+      return false
+    }
+  }
+
+  @Get('getAllRestaurants')
+  getAllRestaurants(){
+    return this.appService.findAllRestaurant()
   }
 }

@@ -9,6 +9,6 @@ export default class Restaurant {
     @Column()
     name: string;
 
-    @Column()
+    @Column("longtext")
     url: string;
 }
