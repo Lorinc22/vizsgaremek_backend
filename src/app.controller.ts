@@ -11,7 +11,7 @@ import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
 import AddressDto from './dto/address.dto';
 import UpdateUserPasswordDto from './dto/updateuserpassword.dto';
-import AddItemDto from './dto/additem.dto';
+import AddToCartDto from './dto/addtocart.dto';
 import Cart from './entity/cart.entity';
 import Menu from './entity/menu.entity';
 
@@ -130,6 +130,23 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
   async addAddress(@Body() addressDto: AddressDto, @Param('id') id: number ) {
     console.log(addressDto);
     const userRepo = this.dataSource.getRepository(User).findOneBy({ id: id})
+  }
+
+  @Post('cart')
+  async addToCart(@Body() addToCartDto: AddToCartDto, @Param('userId') userId:number, @Param('menuId') menuId:number) {
+    const cartRepo = this.dataSource.getRepository(Cart);
+    let cartItem = await this.appService.findCartMenuId(menuId);
+    if (cartItem) {
+      const q = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
+      cartItem.quantity += q;
+    } else {
+      // Otherwise, create a new cart item
+      cartItem = new Cart();
+      cartItem.user = await this.appService.findUserById(userId);
+      cartItem.menu = await this.appService.findMenuById(menuId);
+      cartItem.quantity = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
+    }
+    await cartRepo.save(cartItem);
   }
   
   @Put('users/:id')
