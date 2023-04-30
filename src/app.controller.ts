@@ -134,6 +134,12 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
 
   @Put('users/:id')
   async updateAccountInfo(@Param('id') id: number,@Body() updateUserDto: UpdateUserDto){
+    if(!updateUserDto.firstName ||!updateUserDto.lastName || !updateUserDto.email ||!updateUserDto.phoneNumber){
+      throw new BadRequestException('Minden mező kitöltése kötelező');
+    }
+    if(!updateUserDto.email.includes('@')){
+      throw new BadRequestException('Emailnek tartalmaznia kell @ karaktert');
+    }
     return await( await this.appService.updateAccountInfo(id,updateUserDto));
   }
 
@@ -152,4 +158,5 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
   const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
   return await( await this.appService.updateUserPassword(id,password));
 }
+
 }
