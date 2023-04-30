@@ -10,14 +10,11 @@ export default class Order {
     id: number;
 
     @Column()
-    name: string;
-
-    @Column()
     price: number;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'userId' })
-    user: User;
+    userId: number;
 
     @Column()
     city: string;

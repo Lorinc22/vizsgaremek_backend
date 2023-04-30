@@ -197,7 +197,7 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
     try{
     const orderRepo = this.dataSource.getRepository(Order)
     const order = new Order()
-    order.name = OrderDto.name;
+    order.userId = OrderDto.userId
     order.price = OrderDto.price;
     order.city = OrderDto.city;
     order.street = OrderDto.street;
