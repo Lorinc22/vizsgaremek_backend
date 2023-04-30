@@ -19,7 +19,15 @@ export default class Order {
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @ManyToOne(() => Restaurant)
-    @JoinColumn({ name: 'restaurantId' })
-    restaurant: Restaurant;
+    @Column()
+    city: string;
+
+    @Column()
+    street: string;
+
+    @Column()
+    houseNumber: string;
+
+    @Column()
+    postalCode: number;
 }

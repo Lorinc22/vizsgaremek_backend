@@ -14,6 +14,8 @@ import UpdateUserPasswordDto from './dto/updateuserpassword.dto';
 import AddToCartDto from './dto/addtocart.dto';
 import Cart from './entity/cart.entity';
 import Menu from './entity/menu.entity';
+import OrderDto from './dto/order.dto';
+import Order from './entity/order/order.entity';
 
 @Controller()
 export class AppController {
@@ -117,7 +119,7 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
       throw new BadRequestException('Hibás bejelentkezés');
     }
 
-    const jwt = await this.jwtService.signAsync({id: user.id});
+    const jwt = await this.jwtService.signAsync({id: user.id, firstName: user.firstName, lastName: user.lastName});
     response.cookie('jwt', jwt, {httpOnly: true})
 
     return {
@@ -134,7 +136,8 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
 
   @Post('cart')
   async addToCart(@Body() addToCartDto: AddToCartDto, @Param('userId') userId:number, @Param('menuId') menuId:number) {
-    const cartRepo = this.dataSource.getRepository(Cart);
+    
+    var cartRepo = this.dataSource.getRepository(Cart);
     let cartItem = await this.appService.findCartMenuId(menuId);
     if (cartItem) {
       const q = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
@@ -147,6 +150,13 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
       cartItem.quantity = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
     }
     await cartRepo.save(cartItem);
+    cartRepo = await this.dataSource.getRepository(Cart);
+    try{
+      return await cartRepo.findOneBy({id: userId})
+    }
+    catch(e){
+      return e
+    }
   }
   
   @Put('users/:id')
@@ -168,7 +178,6 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
     if(updateUserPasswordDto.newPassword.length < 8){
       throw new BadRequestException('A jelszónak 8 karakter hosszúnak kell minimum lennie.');
     }
-    // return await( await this.appService.updateUserPassword(id,password));
     try{
       const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
       return true
@@ -181,5 +190,24 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
   @Get('getAllRestaurants')
   getAllRestaurants(){
     return this.appService.findAllRestaurant()
+  }
+
+  @Post('order')
+  async submitOrder(@Body() OrderDto: OrderDto){
+    try{
+    const orderRepo = this.dataSource.getRepository(Order)
+    const order = new Order()
+    order.name = OrderDto.name;
+    order.price = OrderDto.price;
+    order.city = OrderDto.city;
+    order.street = OrderDto.street;
+    order.houseNumber = OrderDto.houseNumber;
+    order.postalCode = OrderDto.postalCode;
+    return orderRepo.save(order)
+
+    }
+    catch(e){
+      return e
+    }
   }
 }
