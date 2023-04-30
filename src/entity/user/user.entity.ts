@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import Address from "./address.entity";
 
 @Entity()
 export default class User {
@@ -20,8 +19,4 @@ export default class User {
 
     @Column()
     password: string;
-
-    @OneToOne(() => Address)
-    @JoinColumn({ name: 'addressId' })
-    address: Address;
 }

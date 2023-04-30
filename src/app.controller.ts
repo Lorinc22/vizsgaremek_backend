@@ -9,10 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Response} from 'express';
 import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
-import AddressDto from './dto/address.dto';
 import UpdateUserPasswordDto from './dto/updateuserpassword.dto';
-import AddToCartDto from './dto/addtocart.dto';
-import Cart from './entity/cart.entity';
 import Menu from './entity/menu.entity';
 import OrderDto from './dto/order.dto';
 import Order from './entity/order/order.entity';
@@ -24,12 +21,6 @@ export class AppController {
     private dataSource: DataSource,
     private jwtService: JwtService 
   ) {}
-
-  @Get()
-  @Render('index')
-  index() {
-    return { message: 'Welcome to the homepage' };
-  }
 
   @Get('users/:id')
   async findUserById(@Param('id') id: number ){
@@ -46,6 +37,11 @@ export class AppController {
     return await (await this.appService.findAllRestaurant());
   }
 
+  @Get('getAllRestaurants')
+  getAllRestaurants(){
+    return this.appService.findAllRestaurant()
+  }
+
   @Get('restaurant/:id')
   async getRestaurant(@Param('id') id: number ){
     const restaurantRepo = this.dataSource.getRepository(Restaurant);
@@ -58,42 +54,31 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
   return menus;
 }
 
-  @Get('restaurants/:searchTerm')
+  @Get('restaurants/search/:searchTerm')
   async searchRestaurants(@Param('searchTerm') searchTerm: string) {
   const restaurants = await this.appService.searchRestaurants(searchTerm);
   return restaurants;
 }
-
-  @Get('user/address/:id')
-  async getUserAddress(@Param('id') id: number ){
-    const userRepo = this.dataSource.getRepository(User);
-    const user = await userRepo
-    .createQueryBuilder('user')
-    .leftJoinAndSelect('user.address', 'address')
-    .where('address.id = :id', { id: id })
-    .getOne();
-    return user.address;
-  }
 
   @Post('/register')
   @HttpCode(200)
   async register(@Body() registerDto: RegisterDto){
     if(!registerDto.email||
       !registerDto.password || !registerDto.rePassword){
-        throw new BadRequestException('All fields are required');
+        throw new BadRequestException('Minden mező kitöltése kötelező');
       }
     if(!registerDto.email.includes('@')){
-      throw new BadRequestException('Email must contain a @ character');
+      throw new BadRequestException('Emailnek tartalmaznia kell @ karaktert');
     }
     if(registerDto.password !== registerDto.rePassword){
-      throw new BadRequestException('The two passwords must match');
+      throw new BadRequestException('A két jelszónak egyeznie kell');
     }
     if(registerDto.password.length < 8){
-      throw new BadRequestException('The password must be at least 8 characters long');
+      throw new BadRequestException('A jelszónak minimum 8 karakternek kell lennie');
     }
    const userTaken = await this.appService.findUserByEmail(registerDto.email);
    if(userTaken){
-    throw new BadRequestException('The email is alredy taken');
+    throw new BadRequestException('Az email cím már foglalt');
    }
    const userRepo = this.dataSource.getRepository(User);
    const user = new User();
@@ -112,11 +97,11 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
     const user = await this.appService.findUserByEmail(loginDto.email);
 
     if(!user){
-      throw new BadRequestException('Hibás bejelentkezés');
+      throw new BadRequestException('Nem található felshasználó');
     }
 
     if(!await bcrypt.compare(loginDto.password, user.password)){
-      throw new BadRequestException('Hibás bejelentkezés');
+      throw new BadRequestException('Hibás jelszó');
     }
 
     const jwt = await this.jwtService.signAsync({id: user.id, firstName: user.firstName, lastName: user.lastName});
@@ -126,70 +111,6 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
       token: jwt,
       userId: user.id,
     };
-  }
-
-  @Post('user:id/address')
-  async addAddress(@Body() addressDto: AddressDto, @Param('id') id: number ) {
-    console.log(addressDto);
-    const userRepo = this.dataSource.getRepository(User).findOneBy({ id: id})
-  }
-
-  @Post('cart')
-  async addToCart(@Body() addToCartDto: AddToCartDto, @Param('userId') userId:number, @Param('menuId') menuId:number) {
-    
-    var cartRepo = this.dataSource.getRepository(Cart);
-    let cartItem = await this.appService.findCartMenuId(menuId);
-    if (cartItem) {
-      const q = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
-      cartItem.quantity += q;
-    } else {
-      // Otherwise, create a new cart item
-      cartItem = new Cart();
-      cartItem.user = await this.appService.findUserById(userId);
-      cartItem.menu = await this.appService.findMenuById(menuId);
-      cartItem.quantity = typeof addToCartDto.quantity == 'string' ? parseInt(addToCartDto.quantity) : addToCartDto.quantity;
-    }
-    await cartRepo.save(cartItem);
-    cartRepo = await this.dataSource.getRepository(Cart);
-    try{
-      return await cartRepo.findOneBy({id: userId})
-    }
-    catch(e){
-      return e
-    }
-  }
-  
-  @Put('users/:id')
-  async updateAccountInfo(@Param('id') id: number,@Body() updateUserDto: UpdateUserDto){
-    
-    return await( await this.appService.updateAccountInfo(id,updateUserDto));
-  }
-
-  @Put('users/password/:id')
-  async updateUserPassword(@Param('id') id: number,@Body() updateUserPasswordDto: UpdateUserPasswordDto){
-
-    const user = await this.appService.findUserById(id);
-    if (!user) {
-      throw new BadRequestException('Nem található a felhasználó.');
-    }
-    if(!await bcrypt.compare(updateUserPasswordDto.oldPassword, user.password)){
-      throw new BadRequestException('Hibás jelszó.');
-    }
-    if(updateUserPasswordDto.newPassword.length < 8){
-      throw new BadRequestException('A jelszónak 8 karakter hosszúnak kell minimum lennie.');
-    }
-    try{
-      const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
-      return true
-    }
-    catch(e){
-      return false
-    }
-  }
-
-  @Get('getAllRestaurants')
-  getAllRestaurants(){
-    return this.appService.findAllRestaurant()
   }
 
   @Post('order')
@@ -203,11 +124,32 @@ async getMenusByRestaurant(@Param('id') restaurantId: number): Promise<Menu[]> {
     order.street = OrderDto.street;
     order.houseNumber = OrderDto.houseNumber;
     order.postalCode = OrderDto.postalCode;
+    order.order_date = new Date();
     return orderRepo.save(order)
-
     }
     catch(e){
       return e
     }
   }
+
+  @Put('users/:id')
+  async updateAccountInfo(@Param('id') id: number,@Body() updateUserDto: UpdateUserDto){
+    return await( await this.appService.updateAccountInfo(id,updateUserDto));
+  }
+
+  @Put('users/password/:id')
+  async updateUserPassword(@Param('id') id: number, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
+  const user = await this.appService.findUserById(id);
+  if (!user) {
+    throw new BadRequestException('Nem található a felhasználó.');
+  }
+  if(!await bcrypt.compare(updateUserPasswordDto.oldPassword, user.password)){
+    throw new BadRequestException('Hibás jelszó.');
+  }
+  if(updateUserPasswordDto.newPassword.length < 8){
+    throw new BadRequestException('A jelszónak 8 karakter hosszúnak kell minimum lennie.');
+  }
+  const password = await bcrypt.hash(updateUserPasswordDto.newPassword, 15 );
+  return await( await this.appService.updateUserPassword(id,password));
+}
 }

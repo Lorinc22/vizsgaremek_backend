@@ -1,7 +1,5 @@
 import { Column,JoinColumn, ManyToOne,OneToOne, Entity, PrimaryGeneratedColumn } from "typeorm";
 import User from "../user/user.entity";
-import Restaurant from "../restaurant.entity";
-import Cart from "../cart.entity";
 
 
 @Entity()
@@ -27,4 +25,7 @@ export default class Order {
 
     @Column()
     postalCode: number;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    order_date: Date;
 }

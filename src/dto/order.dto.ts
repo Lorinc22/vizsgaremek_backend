@@ -7,4 +7,5 @@ export default class OrderDto{
     street: string;
     houseNumber: string;
     postalCode: number;
+    order_date: Date;
 }

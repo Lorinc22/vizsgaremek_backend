@@ -5,18 +5,14 @@ import Restaurant from './entity/restaurant.entity';
 import UpdateUserDto from './dto/updateuser.dto';
 import User from './entity/user/user.entity';
 import { UpdateUserInput } from './dto/updateuserinput.interface';
-import Cart from './entity/cart.entity';
 import Menu from './entity/menu.entity';
 import OrderItem from './entity/menu.entity';
-import { getManager } from 'typeorm';
-import AddToCartDto from './dto/addtocart.dto';
 
 @Injectable()
 export class AppService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
               @InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
               @InjectRepository(Menu) private readonly menuRepository: Repository<Menu>,
-              @InjectRepository(Cart) private readonly cartRepository: Repository<Cart>,
               @InjectRepository(OrderItem) private readonly orderItemRepository: Repository<OrderItem>,
               ){}
   async findOne(condition: any): Promise<User> {
@@ -68,12 +64,7 @@ export class AppService {
       } 
     });
   }
-  async findCartMenuId(menuId: number): Promise<Cart> {
-    return this.cartRepository.findOne({
-      where: { menu: { id: menuId } },
-    });
-  }
-
+  
   async getMenusByRestaurant(restaurantId: number): Promise<Menu[]> {
     const menus = await this.menuRepository
       .createQueryBuilder('menu')
@@ -92,31 +83,13 @@ export class AppService {
     });
   }
 
-  async updateUserPassword(id: number, password: string): Promise<User>{
+  async updateUserPassword(id: number, password: string): Promise<User> {
     const updates: UpdateUserInput = { password };
-  await this.userRepository.update(id, updates);
+    await this.userRepository.update(id, updates);
     return await this.userRepository.findOne({
       "where": {
         "id": id,
-      } 
+      },
     });
   }
-
-  /*async addToCart(id: number, ): Promise<OrderItem> {
-    const item = new Cart(addToCartDto);
-    await this.cartRepository.save(item);
-    return item.toResponseObject();
-  }
-
-  async addToCarta(addToCartDto: AddToCartDto): Promise<OrderItem> {
-    const item = new Cart(addToCartDto);
-    await this.cartRepository.save(item);
-    return item.toResponseObject();
-  }
-
-  async getCartItems(): Promise<CartItem[]> {
-    const items = await this.cartRepository.find();
-    return items.map((item) => item.toResponseObject());
-  }*/
-
 }
