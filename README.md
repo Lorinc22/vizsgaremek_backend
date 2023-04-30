@@ -25,6 +25,7 @@
 
 - `updateUserPassword`: egy @Put HTTP kérésre válaszol, melynek a users/password/:id elérési útvonal van megadva. Az API a felhasználó jelszavának módosítását teszi lehetővé. Az új jelszó érvényesítése után a felhasználó jelszava frissül a megadott új jelszóra.
 
-![sql](https://user-images.githubusercontent.com/112952381/235365955-810628c6-c8fc-4179-809f-5d516c1bb3d4.png)
+![image](https://user-images.githubusercontent.com/112952381/235366172-93326f54-bc72-47f1-8164-f47dd708926d.png)
+
 
 
